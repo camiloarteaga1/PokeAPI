@@ -99,6 +99,7 @@ document.addEventListener('DOMContentLoaded', () => {
             } 
             else {
                 containerEvolution.style.display = 'none';
+                nextPokemon = '';
             }
         })
         .catch((error) => {
@@ -124,19 +125,26 @@ document.addEventListener('DOMContentLoaded', () => {
     function hasFurtherEvolution(evolutionChainData, speciesName) {
         function traverseChain(chain) {
             if (chain.species.name === speciesName) {
-                return true;
-            }
-            if (chain.evolves_to && chain.evolves_to.length > 0) {
-                for (let i = 0; i < chain.evolves_to.length; i++) {
-                    if (traverseChain(chain.evolves_to[i])) {
-                    return true;
+                if (chain.evolves_to && chain.evolves_to.length > 0) {
+                    return true; // If the current species has further evolutions, return true
+                } else {
+                    return false; // If there are no further evolutions for the current species, return false
+                }
+            } else {
+                if (chain.evolves_to && chain.evolves_to.length > 0) {
+                    for (let i = 0; i < chain.evolves_to.length; i++) {
+                        if (traverseChain(chain.evolves_to[i])) {
+                            return true; // If any evolution in the chain has further evolutions, return true
+                        }
                     }
                 }
             }
-            return false;
+            return false; // If no further evolutions are found in the chain, return false
         }
-      return traverseChain(evolutionChainData.chain);
+        return traverseChain(evolutionChainData.chain);
     }
+    
+    
 
     function findNextEvolution(chain, currentSpeciesName) {
         function traverseChain(chain) {
@@ -159,6 +167,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     buttonEvolution.addEventListener('click', () => {
+
+        if (nextPokemon === '') {
+            showError('No hay más evoluciones para este Pokémon');
+            containerEvolution.style.display = 'none';
+            return;
+        }
 
         getPokemonData(nextPokemon)
         .then((pokemonData) => {
